@@ -109,10 +109,11 @@ def index(request):
 				if greeting_or_farewell == "greeting":
 					wow_message = random.choice(greeting_dict[desired_race]['greetings'])
 
-					user_stuff = find_user_info(inputs['user_id'][0])
+					#user_stuff = find_user_info(inputs['user_id'][0])
 
-					requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel", "username":user_stuff['username'], "icon_url": user_stuff['icon_url']}))
-					return HttpResponse(status=201)
+					#requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel", "username":user_stuff['username'], "icon_url": user_stuff['icon_url']}))
+					#return HttpResponse(status=201)
+					return JsonResponse(request)
 
 				elif greeting_or_farewell == "farewell":
 					wow_message = random.choice(greeting_dict[desired_race]['farewells'])
@@ -126,7 +127,7 @@ def index(request):
 					return JsonResponse({"text":"World of Warcraft races available for you to choose from are: %(races)s  (Make your selection after 'greeting' or 'farewell')"%{"races":greeting_dict.keys()}})
 
 				else:
-					return JsonResponse({"text":"Sorry friend, afraid I'm not attuned to %(input_text)s in these parts.  You'll have better luck with either 'greeting' or 'farewell'. :crossed_swords:."%{'input_text': text[0]}})
+					return JsonResponse({"text":"Sorry friend, afraid I'm not attuned to \"%(input_text)s\" in these parts.  You'll have better luck with either 'greeting' or 'farewell'. :crossed_swords:."%{'input_text': text[0]}})
 
 
 
