@@ -5,8 +5,10 @@ import json, random, requests
 
 from .models import Greeting
 
-#hello = ["Hey there!", "Ya got my attention.", "How are ya?", "Talk to me.", "'Lo!", "Well met.", "What's on your mind?", "Great tae meet ya.", "What can I do fer ya?", "Aye?", "Interest ya'n a pint?", "Welcome.", "Hello."]
-#goodbye = ["Off with ye.", "Safe travels.", "Keep your feet on the ground.", "See ya soon.", "Watch yer back!", "Be good!"]
+BASE_URL = "https://slack.com/api"
+API_TOKEN = os.environ.get("SLACK_API_TOKEN")
+WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL").strip()
+SLASH_COMMAND_TOKEN = os.environ.get("SLACK_SLASH_COMMAND_TOKEN")
 
 greeting_dict = {
 					"dwarf": {
@@ -63,6 +65,15 @@ greeting_dict = {
 					}
 				}
 
+def find_user_info(user_id):
+	url = BASE_URL + "/users.info?token={0}&user={1}".format(API_TOKEN, user_id)
+	response = requests.get(url)
+
+	user = response.json()["user"]
+	username = user["name"]
+	icon_url = user["profile"]["image_48"]
+
+	return {"username": username, "icon_url": icon_url}
 
 # Create your views here.
 def index(request):
@@ -70,29 +81,6 @@ def index(request):
 		print "Order up!"
 		print request.GET
 		inputs = dict(request.GET)
-
-		'''
-		if 'token' in inputs and inputs['token'][0] == "cL9cTdOYUlMGaD8ozxpYw2oM":
-			#return JsonResponse({'reponse':{'input':dict(request.GET), 'extra':'lovin', 'int_array':[1,2,3], 'dict':{'inner_key':'inner_value'}}})
-			if inputs['text'][0].lower() == "greeting":
-				myInt = int(random.uniform(0,12))
-				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master %(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':hello[myInt]}, "response_type":"in_channel"}))
-				return HttpResponse(status=201)
-
-			elif inputs['text'][0].lower() == "dismiss":
-				myInt = int(random.uniform(0,6))
-				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master %(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':goodbye[myInt]}, "response_type":"in_channel"}))
-				return HttpResponse(status=201)
-
-			elif inputs['text'][0].lower() == "" or inputs['text'][0].lower() == " ":
-				return JsonResponse({"text":"Try either 'dismiss' or 'greeting' and I'll return a random World of Warcraft quote of that type.", "status_code": 404, "title": "invalid_command"})
-
-			else:
-				return JsonResponse({"text":"Sorry friend, afraid I'm not attuned to %(input_text)s in these parts.  You'll have better luck with either 'dismiss' or 'greeting'."%{'input_text': inputs['text'][0]}})
-
-		else:
-			return JsonResponse({"text": "I need a Slack token to be sure this is a valid request.", "status_code": 403, "title": "invalid_token"})
-		'''
 
 		if 'token' in inputs and inputs['token'][0] == "cL9cTdOYUlMGaD8ozxpYw2oM":
 
@@ -122,7 +110,10 @@ def index(request):
 				## check first greeting or farewell or unknown
 				if greeting_or_farewell == "greeting":
 					wow_message = random.choice(greeting_dict[desired_race]['greetings'])
-					requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+
+					user_stuff = find_user_info(inputs['user_id'][0])
+
+					requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel", "username":user_stuff['username'], "icon_url": user_stuff['icon_url']}))
 					return HttpResponse(status=201)
 
 				elif greeting_or_farewell == "farewell":
