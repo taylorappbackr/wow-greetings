@@ -6,9 +6,7 @@ import json, random, requests
 from .models import Greeting
 
 BASE_URL = "https://slack.com/api"
-API_TOKEN = os.environ.get("SLACK_API_TOKEN")
-WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL").strip()
-SLASH_COMMAND_TOKEN = os.environ.get("SLACK_SLASH_COMMAND_TOKEN")
+API_TOKEN = "xoxp-2677507740-3202689765-17802543026-fed2c46023"
 
 greeting_dict = {
 					"dwarf": {
