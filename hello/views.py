@@ -6,7 +6,7 @@ import json, random, requests
 from .models import Greeting
 
 BASE_URL = "https://slack.com/api"
-API_TOKEN = "xoxp-2677507740-3202689765-17802543026-fed2c46023"
+#API_TOKEN = "xoxp-2677507740-3202689765-47202680948-571bcd3206" # working Token, but is missing permissions
 
 greeting_dict = {
 					"dwarf": {
@@ -63,6 +63,7 @@ greeting_dict = {
 					}
 				}
 
+# Used to get User Info from Slack to post looking like them, currently does not work without OAuth..
 def find_user_info(user_id):
 	url = BASE_URL + "/users.info?token={0}&user={1}".format(API_TOKEN, user_id)
 	response = requests.get(url)
@@ -108,12 +109,8 @@ def index(request):
 				## check first greeting or farewell or unknown
 				if greeting_or_farewell == "greeting":
 					wow_message = random.choice(greeting_dict[desired_race]['greetings'])
-
-					#user_stuff = find_user_info(inputs['user_id'][0])
-
-					#requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel", "username":user_stuff['username'], "icon_url": user_stuff['icon_url']}))
-					#return HttpResponse(status=201)
-					return JsonResponse(request)
+					requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+					return HttpResponse(status=201)
 
 				elif greeting_or_farewell == "farewell":
 					wow_message = random.choice(greeting_dict[desired_race]['farewells'])
