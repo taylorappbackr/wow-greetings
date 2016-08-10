@@ -20,13 +20,13 @@ cur = conn.cursor()
 
 selectNightElfGreetings = """SELECT message_text
 							FROM greetings
-							LEFT JOIN races on races.id=races_id
+							LEFT JOIN races on races.id=races_id::integer
 							WHERE races.name='night elf'
 							ORDER BY RANDOM()
 							LIMIT 1"""
 selectNightElfFarewells = """SELECT message_text
 							FROM farewells
-							LEFT JOIN races on races.id=races_id
+							LEFT JOIN races on races.id=races_id::integer
 							WHERE races.name='night elf'
 							ORDER BY RANDOM()
 							LIMIT 1"""
