@@ -2,6 +2,24 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 import json, random, requests
+import os
+import psycopg2
+import urlparse
+
+urlparse.uses_netloc.append("postgres")
+url = urlparse.urlparse(os.environ["postgres://uetvzmssbikyal:5l2mzADNGZCbqnurUC_KceiGzA@ec2-54-221-253-87.compute-1.amazonaws.com:5432/dcgfj40n9c76tl"])
+
+conn = psycopg2.connect(
+    database=url.path[1:],
+    user=url.username,
+    password=url.password,
+    host=url.hostname,
+    port=url.port
+)
+cur = conn.cursor()
+
+selectNightElfGreetings = "SELECT text FROM greetings WHERE races_id=2 ORDER BY RANDOM() LIMIT 1"
+selectNightElfFarewells = "SELECT text FROM farewells WHERE races_id=2 ORDER BY RANDOM() LIMIT 1"
 
 from .models import Greeting
 
@@ -108,14 +126,26 @@ def index(request):
 
 				## check first greeting or farewell or unknown
 				if greeting_or_farewell == "greeting":
-					wow_message = random.choice(greeting_dict[desired_race]['greetings'])
-					requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
-					return HttpResponse(status=201)
+					if desired_race == 'night elf':
+						cur.execute(selectNightElfGreetings,)
+						wow_message = cur.fetchone()
+						requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+						return HttpResponse(status=201)
+					else:
+						wow_message = random.choice(greeting_dict[desired_race]['greetings'])
+						requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+						return HttpResponse(status=201)
 
 				elif greeting_or_farewell == "farewell":
-					wow_message = random.choice(greeting_dict[desired_race]['farewells'])
-					requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
-					return HttpResponse(status=201)
+					if desired_race == 'night elf':
+						cur.execute(selectNightElfFarewells,)
+						wow_message = cur.fetchone()
+						requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+						return HttpResponse(status=201)
+					else:
+						wow_message = random.choice(greeting_dict[desired_race]['farewells'])
+						requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+						return HttpResponse(status=201)
 
 				elif greeting_or_farewell == "":
 					return JsonResponse({"text":"Try either 'greeting' or 'farewell' and I'll return a random World of Warcraft quote of that type. :crossed_swords:"})
