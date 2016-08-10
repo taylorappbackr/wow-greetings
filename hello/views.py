@@ -138,7 +138,7 @@ def index(request):
 				if greeting_or_farewell == "greeting":
 					if desired_race == 'night elf':
 						cur.execute(selectNightElfGreetings,)
-						wow_message = cur.fetchone()
+						wow_message = cur.fetchone()[0]
 						requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
 						return HttpResponse(status=201)
 					else:
@@ -149,7 +149,7 @@ def index(request):
 				elif greeting_or_farewell == "farewell":
 					if desired_race == 'night elf':
 						cur.execute(selectNightElfFarewells,)
-						wow_message = cur.fetchone()
+						wow_message = cur.fetchone()[0]
 						requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
 						return HttpResponse(status=201)
 					else:
