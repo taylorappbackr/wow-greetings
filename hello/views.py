@@ -18,8 +18,18 @@ conn = psycopg2.connect(
 )
 cur = conn.cursor()
 
-selectNightElfGreetings = "SELECT message_text FROM greetings WHERE races_id=2 ORDER BY RANDOM() LIMIT 1"
-selectNightElfFarewells = "SELECT message_text FROM farewells WHERE races_id=2 ORDER BY RANDOM() LIMIT 1"
+selectNightElfGreetings = """SELECT message_text
+							FROM greetings
+							LEFT JOIN races on races.id=races_id
+							WHERE races.name='night elf'
+							ORDER BY RANDOM()
+							LIMIT 1"""
+selectNightElfFarewells = """SELECT message_text
+							FROM farewells
+							LEFT JOIN races on races.id=races_id
+							WHERE races.name='night elf'
+							ORDER BY RANDOM()
+							LIMIT 1"""
 
 from .models import Greeting
 
