@@ -37,6 +37,7 @@ selectFarewells = """SELECT message_text
 checkRace = "SELECT id FROM races WHERE name=%(race_name)s"
 selectAllRaces = "SELECT name FROM races"
 selectRandomRace = "SELECT name FROM races ORDER BY RANDOM() LIMIT 1"
+insertNewUser = "INSERT INTO users (team_name, access_token, team_id, scope) VALUES (%(team_name)s, %(access_token)s, %(team_id)s, %(scope)s)"
 
 # Create your views here.
 @csrf_exempt
@@ -160,26 +161,39 @@ def auth_success(request):
 		inputs = dict(request.GET)
 
 		tempCode = inputs['code'][0]
-		print tempCode
+		print "tempCode:", tempCode
 
 		print "Calling the Slack server to exchange tempCode for an access_token...."
 		slackExchangeCodeForAccessTokenUrl = "https://slack.com/api/oauth.access"
 		response = requests.get(slackExchangeCodeForAccessTokenUrl, params={'code':tempCode, 'client_id':os.environ["WOW_SLACK_CLIENT_ID"], 'client_secret':os.environ["WOW_SLACK_CLIENT_SECRET"]})
 		print "have now called the Slack server with a status code of: %s"%response.status_code
 
-		## response should now hold an access_token that I need to save and use forever for this team
-		#{
-    	#  "access_token": "xoxp-23984754863-2348975623103",
-    	#  "scope": "read"
-		#}
+		print "response:", response.json()
 
-		print response
-		print response.json()
+		try:
+			access_token = response.json()['access_token']
+			print "access_token:", access_token
+		except:
+			print "Error retreiving access_token from response. Logging as None"
+			access_token = None
+		try:
+			team_name = response.json()['team_name']
+		except:
+			team_name = None
+		try:
+			team_id = response.json()['team_id']
+		except:
+			team_id = None
+		try:
+			scope = response.json()['scope']
+		except:
+			scope = None
+		
 
-		access_token = response.json()['access_token']
-
-		print access_token
 		##### still need to log this in my database, might need it later #####
+		cur.execute(insertNewUser, {'team_name':'', 'access_token':'', 'team_id':'', 'scope':''})
+		conn.commit()
+
 
 		print "Success! I should now have an access_token for the new user's team, and they should now be able to use my service!"
 
