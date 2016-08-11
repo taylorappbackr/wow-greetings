@@ -43,7 +43,7 @@ def index(request):
 		print request.GET
 		inputs = dict(request.GET)
 
-		if 'token' in inputs and inputs['token'][0] == OS.environ["APPBACKR_SLACK_TOKEN"]:
+		if 'token' in inputs and inputs['token'][0] == os.environ["APPBACKR_SLACK_TOKEN"]:
 
 			if 'text' in inputs and inputs['text'] != []:
 
