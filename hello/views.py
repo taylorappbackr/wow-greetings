@@ -80,7 +80,7 @@ def index(request):
 							selectAllRaces = "SELECT name FROM races"
 							cur.execute(selectAllRaces,)
 							races = cur.fetchall()
-							races_list = [race[0] for race in races]
+							races_list = [str(race[0])for race in races]
 							return JsonResponse({"text":"Sorry friend, afraid I've never seen specimen of the %(desired_race)s species round these parts.\nWorld of Warcraft races available for you to choose from are: %(races)s"%{"desired_race":desired_race, "races":races_list}})
 						else:
 							race_id = race_id[0]
@@ -118,7 +118,7 @@ def index(request):
 					selectAllRaces = "SELECT name FROM races"
 					cur.execute(selectAllRaces,)
 					races = cur.fetchall()
-					races_list = [race[0] for race in races]
+					races_list = [str(race[0]) for race in races]
 					return JsonResponse({"text":"World of Warcraft races available for you to choose from are: %(races)s  (Make your selection after 'greeting' or 'farewell')"%{"races":races_list}})
 
 				else:
