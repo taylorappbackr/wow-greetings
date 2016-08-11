@@ -118,8 +118,11 @@ def index(request):
 					selectAllRaces = "SELECT name FROM races"
 					cur.execute(selectAllRaces,)
 					races = cur.fetchall()
-					races_list = [str(race[0]) for race in races]
-					return JsonResponse({"text":"World of Warcraft races available for you to choose from are: %(races)s  (Make your selection after 'greeting' or 'farewell')"%{"races":races_list}})
+					if races == []:
+						return JsonResponse({"text":"I'm ever so sorry Master @%(username)s.  It appears my tomes have gotten mixed up.  Please query my wisdom later. :crystal_ball:"%{'username':inputs['user_name'][0]}})
+					else:
+						races_list = [str(race[0]) for race in races]
+						return JsonResponse({"text":"World of Warcraft races available for you to choose from are: %(races)s  (Make your selection after 'greeting' or 'farewell')"%{"races":races_list}})
 
 				else:
 					return JsonResponse({"text":"Sorry friend, afraid I'm not attuned to \"%(input_text)s\" in these parts.  You'll have better luck with either 'greeting' or 'farewell'. :crossed_swords:."%{'input_text': text[0]}})
