@@ -154,7 +154,7 @@ def auth_success(request):
 
 		print "Calling the Slack server to exchange tempCode for an access_token...."
 		slackExchangeCodeForAccessTokenUrl = "https://slack.com/api/oauth.access"
-		response = requests.get(slackExchangeCodeForAccessTokenUrl, params={'code':tempCode, 'client_id':OS.environ["WOW_SLACK_CLIENT_ID"], 'client_secret':OS.environ["WOW_SLACK_CLIENT_SECRET"]})
+		response = requests.get(slackExchangeCodeForAccessTokenUrl, params={'code':tempCode, 'client_id':os.environ["WOW_SLACK_CLIENT_ID"], 'client_secret':os.environ["WOW_SLACK_CLIENT_SECRET"]})
 		print "have now called the Slack server with a status code of: %s"%response.status_code
 
 		## response should now hold an access_token that I need to save and use forever for this team
