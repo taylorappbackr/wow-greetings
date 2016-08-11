@@ -168,30 +168,38 @@ def auth_success(request):
 		response = requests.get(slackExchangeCodeForAccessTokenUrl, params={'code':tempCode, 'client_id':os.environ["WOW_SLACK_CLIENT_ID"], 'client_secret':os.environ["WOW_SLACK_CLIENT_SECRET"]})
 		print "have now called the Slack server with a status code of: %s"%response.status_code
 
-		print "response:", response.json()
+		dataReceived = response.json()
+
+		print "response:", dataReceived
 
 		try:
-			access_token = response.json()['access_token']
+			access_token = dataReceived['access_token']
 			print "access_token:", access_token
 		except:
 			print "Error retreiving access_token from response. Logging as None"
 			access_token = None
 		try:
-			team_name = response.json()['team_name']
+			team_name = dataReceived['team_name']
+			print "team_name:", team_name
 		except:
+			print "Error retreiving team_name from response. Logging as None"
 			team_name = None
 		try:
-			team_id = response.json()['team_id']
+			team_id = dataReceived['team_id']
+			print "team_id", team_id
 		except:
+			print "Error retreiving team_id from response. Logging as None"
 			team_id = None
 		try:
-			scope = response.json()['scope']
+			scope = dataReceived['scope']
+			print "scope", scope
 		except:
+			print "Error retreiving scope from response. Logging as None"
 			scope = None
 		
 
 		##### still need to log this in my database, might need it later #####
-		cur.execute(insertNewUser, {'team_name':'', 'access_token':'', 'team_id':'', 'scope':''})
+		cur.execute(insertNewUser, {'team_name':team_name, 'access_token':access_token, 'team_id':team_id, 'scope':scope})
 		conn.commit()
 
 
