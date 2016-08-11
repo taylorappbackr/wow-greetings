@@ -36,8 +36,6 @@ checkRace = "SELECT id FROM races WHERE name=%(race_name)s"
 selectAllRaces = "SELECT name FROM races"
 selectRandomRace = "SELECT name FROM races ORDER BY RANDOM() LIMIT 1"
 
-BASE_URL = "https://slack.com/api"
-
 # Create your views here.
 def index(request):
 	if request.method == 'GET':
@@ -45,7 +43,7 @@ def index(request):
 		print request.GET
 		inputs = dict(request.GET)
 
-		if 'token' in inputs and inputs['token'][0] == "cL9cTdOYUlMGaD8ozxpYw2oM":
+		if 'token' in inputs and inputs['token'][0] == OS.environ["APPBACKR_SLACK_TOKEN"]:
 
 			if 'text' in inputs and inputs['text'] != []:
 
