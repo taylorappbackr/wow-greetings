@@ -126,3 +126,13 @@ def db(request):
 
     return render(request, 'db.html', {'greetings': greetings})
 
+
+
+
+def auth(request):
+
+	print "Loading Auth page."
+
+	return render(request, 'base.html')
+
+	print "Auth page loaded with no problems."
