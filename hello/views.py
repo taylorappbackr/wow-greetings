@@ -117,11 +117,12 @@ def index(request):
 
 	elif request.method == 'POST':
 
-		body_unicode = request.body.decode('utf-8')
-		body = json.loads(body_unicode)
-		#content = body['content']
+		print "POST Order up!"
 
-		print body
+		#body_unicode = request.body.decode('utf-8')
+		#body = json.loads(body_unicode)
+		#content = body['content']
+		#print body
 
 		print request.POST
 
