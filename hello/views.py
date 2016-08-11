@@ -116,7 +116,7 @@ def index(request):
 
 
 
-
+## Not needed (from original setup code), but crashes the setup files somewhere...
 def db(request):
 
     greeting = Greeting()
@@ -128,7 +128,7 @@ def db(request):
 
 
 
-
+## displays a page with the Slack Button to authorize me to enter their team
 def auth(request):
 
 	print "Loading Auth page."
@@ -136,3 +136,43 @@ def auth(request):
 	return render(request, 'base.html')
 
 	print "Auth page loaded with no problems."
+
+
+
+## Slack Button authorization success calls this method to exchange a temporary code for a permanent access token, which I'll save (but don't know why I need since I always get a reponse_url from the /command)
+def auth_success(request):
+
+	print "User has given me permission to join their Guild!"
+
+	if request.method == 'GET':
+		
+		print request.GET
+		inputs = dict(request.GET)
+
+		tempCode = inputs['code'][0]
+
+		slackExchangeCodeForAccessTokenUrl = "https://slack.com/api/oauth.access"
+		response = requests.get(slackExchangeCodeForAccessTokenUrl, params={'code':tempCode, 'client_id':OS.environ["WOW_SLACK_CLIENT_ID"], 'client_secret':OS.environ["WOW_SLACK_CLIENT_SECRET"]})
+
+		## response should now hold an access_token that I need to save and use forever for this team
+		#{
+    	#  "access_token": "xoxp-23984754863-2348975623103",
+    	#  "scope": "read"
+		#}
+
+		print response
+		print response.json()
+
+		access_token = response.json()['access_token']
+
+		print access_token
+		##### still need to log this in my database, might need it later #####
+
+		print "Success! I should now have an access_token for the new user's team, and they should now be able to use my service!"
+
+
+
+
+
+
+
