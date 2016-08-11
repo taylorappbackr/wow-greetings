@@ -173,6 +173,8 @@ def auth_success(request):
 
 		print "Success! I should now have an access_token for the new user's team, and they should now be able to use my service!"
 
+		return render(request, 'auth_success.html')
+
 
 
 
