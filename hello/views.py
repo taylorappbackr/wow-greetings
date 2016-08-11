@@ -7,6 +7,8 @@ import os
 import psycopg2
 import urlparse
 
+from django.views.decorators.csrf import csrf_exempt
+
 urlparse.uses_netloc.append("postgres")
 url = urlparse.urlparse(os.environ["DATABASE_URL"])
 
@@ -37,6 +39,7 @@ selectAllRaces = "SELECT name FROM races"
 selectRandomRace = "SELECT name FROM races ORDER BY RANDOM() LIMIT 1"
 
 # Create your views here.
+@csrf_exempt
 def index(request):
 	if request.method == 'GET':
 		print "Order up!"
@@ -119,6 +122,8 @@ def index(request):
 		#content = body['content']
 
 		print body
+
+		print request.POST
 
 
 
