@@ -112,6 +112,13 @@ def index(request):
 				else:
 					return JsonResponse({"text":"Sorry friend, afraid I'm not attuned to \"%(input_text)s\" in these parts.  You'll have better luck with either 'greeting' or 'farewell'. :crossed_swords:."%{'input_text': text[0]}})
 
+	elif request.method == 'POST':
+
+		body_unicode = request.body.decode('utf-8')
+		body = json.loads(body_unicode)
+		#content = body['content']
+
+		print body
 
 
 
