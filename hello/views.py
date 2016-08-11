@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
+from .models import Greeting
 import json, random, requests
 import os
 import psycopg2
@@ -16,15 +17,7 @@ conn = psycopg2.connect(
     host=url.hostname,
     port=url.port
 )
-'''
-conn = psycopg2.connect(
-    database='dcgfj40n9c76tl',
-    user='uetvzmssbikyal',
-    password='5l2mzADNGZCbqnurUC_KceiGzA',
-    host='ec2-54-221-253-87.compute-1.amazonaws.com',
-    port='5432'
-)
-'''
+
 cur = conn.cursor()
 
 selectGreetings = """SELECT message_text
@@ -39,22 +32,11 @@ selectFarewells = """SELECT message_text
 					WHERE races.name=%(desired_race)s
 					ORDER BY RANDOM()
 					LIMIT 1"""
-
-from .models import Greeting
+checkRace = "SELECT id FROM races WHERE name=%(race_name)s"
+selectAllRaces = "SELECT name FROM races"
+selectRandomRace = "SELECT name FROM races ORDER BY RANDOM() LIMIT 1"
 
 BASE_URL = "https://slack.com/api"
-#API_TOKEN = "xoxp-2677507740-3202689765-47202680948-571bcd3206" # working Token, but is missing permissions
-
-# Used to get User Info from Slack to post looking like them, currently does not work without OAuth..
-def find_user_info(user_id):
-	url = BASE_URL + "/users.info?token={0}&user={1}".format(API_TOKEN, user_id)
-	response = requests.get(url)
-
-	user = response.json()["user"]
-	username = user["name"]
-	icon_url = user["profile"]["image_48"]
-
-	return {"username": username, "icon_url": icon_url}
 
 # Create your views here.
 def index(request):
@@ -81,12 +63,10 @@ def index(request):
 						desired_race = "blood elf"
 					else:
 						desired_race = text[1].lower()
-						checkRace = "SELECT id FROM races WHERE name=%(race_name)s"
 						cur.execute(checkRace, {'race_name':desired_race})
 						race_id = cur.fetchone()
 						if race_id is None:
 							## return an unknown race error
-							selectAllRaces = "SELECT name FROM races"
 							cur.execute(selectAllRaces,)
 							races = cur.fetchall()
 							races_list = [str(race[0])for race in races]
@@ -94,7 +74,6 @@ def index(request):
 						else:
 							race_id = race_id[0]
 				else:
-					selectRandomRace = "SELECT name FROM races ORDER BY RANDOM() LIMIT 1"
 					cur.execute(selectRandomRace,)
 					desired_race = cur.fetchone()[0]
 
@@ -124,7 +103,6 @@ def index(request):
 					return JsonResponse({"text":"Try either 'greeting' or 'farewell' and I'll return a random World of Warcraft quote of that type. :crossed_swords:"})
 
 				elif greeting_or_farewell == "races":
-					selectAllRaces = "SELECT name FROM races"
 					cur.execute(selectAllRaces,)
 					races = cur.fetchall()
 					if races == []:
