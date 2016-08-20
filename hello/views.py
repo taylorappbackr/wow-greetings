@@ -45,11 +45,11 @@ def index(request):
 
 	## get the inputs
 	if request.method == 'GET':
-		print "Order up!"
+		print "GET order up!"
 		print request.GET
 		inputs = dict(request.GET)
 	elif request.method == 'POST':
-		print "POST Order up!"
+		print "POST order up!"
 		print request.POST
 		inputs = dict(request.POST)
 
