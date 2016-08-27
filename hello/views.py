@@ -61,7 +61,7 @@ def index(request):
 
 		## first should be my main command
 		greeting_or_farewell = text[0].lower()
-		
+
 		## second is optional, specifies race
 		if len(text) > 1:
 			if text[1].lower() == "night" and text[2].lower() == "elf":
@@ -124,7 +124,16 @@ def index(request):
 		else:
 			return JsonResponse({"text":"Sorry friend, afraid I'm not attuned to \"%(input_text)s\" in these parts.  You'll have better luck with either 'greeting' or 'farewell'. :crossed_swords:."%{'input_text': text[0]}})
 
+## Display homepage for people to learn and signup
+def home(request):
 
+    # I dunno yet...
+    # return an HTML homepage for peeps to sign up
+    print "Loading homepage from Auth view."
+
+	return render(request, 'base.html')
+
+	print "Homepage loaded from Auth view with no problems."
 
 
 ## Not needed (from original setup code), but crashes the setup files somewhere...
@@ -156,7 +165,7 @@ def auth_success(request):
 	print "User has given me permission to join their Guild!"
 
 	if request.method == 'GET':
-		
+
 		print request.GET
 		inputs = dict(request.GET)
 
@@ -196,7 +205,7 @@ def auth_success(request):
 		except:
 			print "Error retreiving scope from response. Logging as None"
 			scope = None
-		
+
 
 		##### still need to log this in my database, might need it later #####
 		cur.execute(insertNewUser, {'team_name':team_name, 'access_token':access_token, 'team_id':team_id, 'scope':scope})
@@ -206,10 +215,3 @@ def auth_success(request):
 		print "Success! I should now have an access_token for the new user's team, and they should now be able to use my service!"
 
 		return render(request, 'auth_success.html')
-
-
-
-
-
-
-
