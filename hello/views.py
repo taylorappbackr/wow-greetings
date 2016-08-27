@@ -127,13 +127,11 @@ def index(request):
 ## Display homepage for people to learn and signup
 def home(request):
 
-    # I dunno yet...
-    # return an HTML homepage for peeps to sign up
     print "Loading homepage from Auth view."
 
-	return render(request, 'base.html')
+    return render(request, 'base.html')
 
-	print "Homepage loaded from Auth view with no problems."
+    print "Homepage loaded from Auth view with no problems."
 
 
 ## Not needed (from original setup code), but crashes the setup files somewhere...
