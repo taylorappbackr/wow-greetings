@@ -1,16 +1,15 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
-from .models import Greeting
-import json, random, requests
-import os
-import psycopg2
-import urlparse
-
 from django.views.decorators.csrf import csrf_exempt
+from .models import Greeting
+import json, random, requests, mixpanel, os, psycopg2, urlparse, uuid
 
 urlparse.uses_netloc.append("postgres")
 url = urlparse.urlparse(os.environ["DATABASE_URL"])
+
+mixpanelToken = os.environ["MIXPANEL_TOKEN"]
+mp = Mixpanel(mixpanelToken)
 
 conn = psycopg2.connect(
     database=url.path[1:],
@@ -62,6 +61,9 @@ def index(request):
 		## first should be my main command
 		greeting_or_farewell = text[0].lower()
 
+        ## initialize race_id for later use checking whether a specific race was requested
+        race_id = None
+
 		## second is optional, specifies race
 		if len(text) > 1:
 			if text[1].lower() == "night" and text[2].lower() == "elf":
@@ -91,7 +93,15 @@ def index(request):
 			wow_message = cur.fetchone()
 			if wow_message is not None:
 				wow_message = wow_message[0]
-				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+
+                ## send event to Mixpanel
+                if race_id is None:
+                    requested_race = False
+                else:
+                    requested_race = True
+                mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Greeting", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
+                requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
 				return HttpResponse(status=201)
 			else:
 				return JsonResponse({"text":"I'm ever so sorry Master @%(username)s.  It appears my tomes have gotten mixed up.  Please query my wisdom later. :crystal_ball:"%{'username':inputs['user_name'][0]}})
@@ -101,6 +111,14 @@ def index(request):
 			wow_message = cur.fetchone()
 			if wow_message is not None:
 				wow_message = wow_message[0]
+
+                ## send event to Mixpanel
+                if race_id is None:
+                    requested_race = False
+                else:
+                    requested_race = True
+                mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Farewell", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
 				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
 				return HttpResponse(status=201)
 			else:
