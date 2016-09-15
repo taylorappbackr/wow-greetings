@@ -80,6 +80,10 @@ def index(request):
 					cur.execute(selectAllRaces,)
 					races = cur.fetchall()
 					races_list = [str(race[0])for race in races]
+
+					## track Mixpanel
+					mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Unknown Race", {'desired_race':desired_race, 'specific_race_requested':True, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
 					return JsonResponse({"text":"Sorry friend, afraid I've never seen specimen of the %(desired_race)s species round these parts.\nWorld of Warcraft races available for you to choose from are: %(races)s"%{"desired_race":desired_race, "races":races_list}})
 				else:
 					race_id = race_id[0]
@@ -126,9 +130,17 @@ def index(request):
 				return JsonResponse({"text":"I'm ever so sorry Master @%(username)s.  It appears my tomes have gotten mixed up.  Please query my wisdom later. :crystal_ball:"%{'username':inputs['user_name'][0]}})
 
 		elif greeting_or_farewell == "":
+
+			## track Mixpanel
+			mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Blank Request", {'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
 			return JsonResponse({"text":"Try either 'greeting' or 'farewell' and I'll return a random World of Warcraft quote of that type. :crossed_swords:"})
 
 		elif greeting_or_farewell == "help":
+
+			## track Mixpanel
+			mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Help", {'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
 			return JsonResponse({"text":"Try either 'greeting' or 'farewell' and I'll return a random World of Warcraft quote of that type. :crossed_swords:\nYou can also try 'races' for a list of all the World of Warcraft races you can choose a greeting from."})
 
 		elif greeting_or_farewell == "races":
@@ -138,6 +150,10 @@ def index(request):
 				return JsonResponse({"text":"I'm ever so sorry Master @%(username)s.  It appears my tomes have gotten mixed up.  Please query my wisdom later. :crystal_ball:"%{'username':inputs['user_name'][0]}})
 			else:
 				races_list = [str(race[0]) for race in races]
+
+				## track Mixpanel
+				mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "List Races", {'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
 				return JsonResponse({"text":"World of Warcraft races available for you to choose from are: %(races)s  (Make your selection after 'greeting' or 'farewell')"%{"races":races_list}})
 
 		else:
@@ -148,9 +164,10 @@ def home(request):
 
 	print "Loading homepage from Auth view."
 
-	return render(request, 'base.html')
+	## track Mixpanel
+	mp.track(uuid.uuid4(), "Load Homepage")
 
-	print "Homepage loaded from Auth view with no problems."
+	return render(request, 'base.html')
 
 
 ## Not needed (from original setup code), but crashes the setup files somewhere...
@@ -169,6 +186,9 @@ def db(request):
 def auth(request):
 
 	print "Loading Auth page."
+
+	## track Mixpanel
+	mp.track(uuid.uuid4(), "Load Auth Page")
 
 	return render(request, 'base.html')
 
@@ -228,7 +248,9 @@ def auth_success(request):
 		cur.execute(insertNewUser, {'team_name':team_name, 'access_token':access_token, 'team_id':team_id, 'scope':scope})
 		conn.commit()
 
-
 		print "Success! I should now have an access_token for the new user's team, and they should now be able to use my service!"
+
+		## track Mixpanel
+		mp.track(team_name, "Signup", {'scope':scope, 'team_id':team_id, 'team_name':team_name})
 
 		return render(request, 'auth_success.html')
