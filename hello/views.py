@@ -12,11 +12,11 @@ mixpanelToken = os.environ["MIXPANEL_TOKEN"]
 mp = Mixpanel(mixpanelToken)
 
 conn = psycopg2.connect(
-    database=url.path[1:],
-    user=url.username,
-    password=url.password,
-    host=url.hostname,
-    port=url.port
+	database=url.path[1:],
+	user=url.username,
+	password=url.password,
+	host=url.hostname,
+	port=url.port
 )
 
 cur = conn.cursor()
@@ -61,11 +61,11 @@ def index(request):
 		## first should be my main command
 		greeting_or_farewell = text[0].lower()
 
-        ## initialize race_id for later use checking whether a specific race was requested
-        race_id = None
+		## initialize race_id for later use checking whether a specific race was requested
+		race_id = None
 
-        ## second is optional, specifies race
-        if len(text) > 1:
+		## second is optional, specifies race
+		if len(text) > 1:
 			if text[1].lower() == "night" and text[2].lower() == "elf":
 				desired_race = "night elf"
 			elif text[1].lower() == "blood" and text[2].lower() == "elf":
@@ -82,7 +82,7 @@ def index(request):
 					return JsonResponse({"text":"Sorry friend, afraid I've never seen specimen of the %(desired_race)s species round these parts.\nWorld of Warcraft races available for you to choose from are: %(races)s"%{"desired_race":desired_race, "races":races_list}})
 				else:
 					race_id = race_id[0]
-        else:
+		else:
 			cur.execute(selectRandomRace,)
 			desired_race = cur.fetchone()[0]
 
@@ -94,14 +94,14 @@ def index(request):
 			if wow_message is not None:
 				wow_message = wow_message[0]
 
-                ## send event to Mixpanel
-                if race_id is None:
-                    requested_race = False
-                else:
-                    requested_race = True
-                mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Greeting", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+				## send event to Mixpanel
+				if race_id is None:
+					requested_race = False
+				else:
+					requested_race = True
+				mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Greeting", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
 
-                requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
 				return HttpResponse(status=201)
 			else:
 				return JsonResponse({"text":"I'm ever so sorry Master @%(username)s.  It appears my tomes have gotten mixed up.  Please query my wisdom later. :crystal_ball:"%{'username':inputs['user_name'][0]}})
@@ -112,12 +112,12 @@ def index(request):
 			if wow_message is not None:
 				wow_message = wow_message[0]
 
-                ## send event to Mixpanel
-                if race_id is None:
-                    requested_race = False
-                else:
-                    requested_race = True
-                mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Farewell", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+				## send event to Mixpanel
+				if race_id is None:
+					requested_race = False
+				else:
+					requested_race = True
+				mp.track(inputs['team_domain'][0]+"_"+inputs['user_name'][0], "Farewell", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
 
 				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
 				return HttpResponse(status=201)
@@ -145,22 +145,22 @@ def index(request):
 ## Display homepage for people to learn and signup
 def home(request):
 
-    print "Loading homepage from Auth view."
+	print "Loading homepage from Auth view."
 
-    return render(request, 'base.html')
+	return render(request, 'base.html')
 
-    print "Homepage loaded from Auth view with no problems."
+	print "Homepage loaded from Auth view with no problems."
 
 
 ## Not needed (from original setup code), but crashes the setup files somewhere...
 def db(request):
 
-    greeting = Greeting()
-    greeting.save()
+	greeting = Greeting()
+	greeting.save()
 
-    greetings = Greeting.objects.all()
+	greetings = Greeting.objects.all()
 
-    return render(request, 'db.html', {'greetings': greetings})
+	return render(request, 'db.html', {'greetings': greetings})
 
 
 
