@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Greeting
 import json, random, requests, mixpanel, os, psycopg2, urlparse, uuid
+from mixpanel import Mixpanel
 
 urlparse.uses_netloc.append("postgres")
 url = urlparse.urlparse(os.environ["DATABASE_URL"])
