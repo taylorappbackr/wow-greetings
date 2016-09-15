@@ -64,8 +64,8 @@ def index(request):
         ## initialize race_id for later use checking whether a specific race was requested
         race_id = None
 
-		## second is optional, specifies race
-		if len(text) > 1:
+        ## second is optional, specifies race
+        if len(text) > 1:
 			if text[1].lower() == "night" and text[2].lower() == "elf":
 				desired_race = "night elf"
 			elif text[1].lower() == "blood" and text[2].lower() == "elf":
