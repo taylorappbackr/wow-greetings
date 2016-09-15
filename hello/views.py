@@ -82,7 +82,7 @@ def index(request):
 					return JsonResponse({"text":"Sorry friend, afraid I've never seen specimen of the %(desired_race)s species round these parts.\nWorld of Warcraft races available for you to choose from are: %(races)s"%{"desired_race":desired_race, "races":races_list}})
 				else:
 					race_id = race_id[0]
-		else:
+        else:
 			cur.execute(selectRandomRace,)
 			desired_race = cur.fetchone()[0]
 
