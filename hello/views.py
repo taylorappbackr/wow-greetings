@@ -165,7 +165,7 @@ def home(request):
 	print "Loading homepage from Auth view."
 
 	## track Mixpanel
-	mp.track(uuid.uuid4(), "Load Homepage")
+	mp.track(str(uuid.uuid4()), "Load Homepage")
 
 	return render(request, 'base.html')
 
@@ -188,7 +188,7 @@ def auth(request):
 	print "Loading Auth page."
 
 	## track Mixpanel
-	mp.track(uuid.uuid4(), "Load Auth Page")
+	mp.track(str(uuid.uuid4()), "Load Auth Page")
 
 	return render(request, 'base.html')
 
