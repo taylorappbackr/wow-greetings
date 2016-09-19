@@ -84,6 +84,9 @@ def index(request):
 					## track Mixpanel
 					mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Unknown Race", {'desired_race':desired_race, 'specific_race_requested':True, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
 
+					## create/update Mixpanel User
+					mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
+
 					return JsonResponse({"text":"Sorry friend, afraid I've never seen specimen of the %(desired_race)s species round these parts.\nWorld of Warcraft races available for you to choose from are: %(races)s"%{"desired_race":desired_race, "races":races_list}})
 				else:
 					race_id = race_id[0]
@@ -106,6 +109,9 @@ def index(request):
 					requested_race = True
 				mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Greeting", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
 
+				## create/update Mixpanel User
+				mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
+
 				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
 				return HttpResponse(status=201)
 			else:
@@ -124,6 +130,9 @@ def index(request):
 					requested_race = True
 				mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Farewell", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
 
+				## create/update Mixpanel User
+				mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
+
 				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
 				return HttpResponse(status=201)
 			else:
@@ -134,12 +143,18 @@ def index(request):
 			## track Mixpanel
 			mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Blank Request", {'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
 
+			## create/update Mixpanel User
+			mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
+
 			return JsonResponse({"text":"Try either 'greeting' or 'farewell' and I'll return a random World of Warcraft quote of that type. :crossed_swords:"})
 
 		elif greeting_or_farewell == "help":
 
 			## track Mixpanel
 			mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Help", {'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
+			## create/update Mixpanel User
+			mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
 
 			return JsonResponse({"text":"Try either 'greeting' or 'farewell' and I'll return a random World of Warcraft quote of that type. :crossed_swords:\nYou can also try 'races' for a list of all the World of Warcraft races you can choose a greeting from."})
 
@@ -153,6 +168,9 @@ def index(request):
 
 				## track Mixpanel
 				mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "List Races", {'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
+				## create/update Mixpanel User
+				mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
 
 				return JsonResponse({"text":"World of Warcraft races available for you to choose from are: %(races)s  (Make your selection after 'greeting' or 'farewell')"%{"races":races_list}})
 
@@ -258,5 +276,8 @@ def auth_success(request):
 
 		## track Mixpanel
 		mp.track(str(team_id)+"_"+str(user_id), "Signup", {'scope':scope, 'team_id':team_id, 'team_name':team_name, 'user_id':user_id})
+
+		## create/update Mixpanel User
+		mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'slack_team_name':team_name})
 
 		return render(request, 'auth_success.html')
