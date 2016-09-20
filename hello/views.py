@@ -280,4 +280,12 @@ def auth_success(request):
 		## create/update Mixpanel User
 		mp.people_set(str(team_id)+"_"+str(user_id), {'$distinct_id':str(team_id)+"_"+str(user_id), 'slack_team_name':team_name})
 
+		## ping myself in slack
+		SLACK_WEBHOOK_URL = os.environ['SLACK_WEBHOOK_URL']
+		response = requests.post(SLACK_WEBHOOK_URL, payload={'text':'A new User has signed up for Warcraft Greetings!  Huzzah! :crossed_swords:\nMeet the %(team_name)s Team.'%{'team_name':team_name}, 'channel':'@taylor', 'username':'Warcraft Greetings', 'icon_url':'https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-08-11/68703636325_479501fda3b50e7281a8_512.png'})
+		if response.status_code != 200:
+			print response
+			print "Slack response META:", response.META
+			print "Slack response data:", response.json()
+
 		return render(request, 'auth_success.html')
