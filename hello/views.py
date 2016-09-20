@@ -37,7 +37,7 @@ selectFarewells = """SELECT message_text
 checkRace = "SELECT id FROM races WHERE name=%(race_name)s"
 selectAllRaces = "SELECT name FROM races"
 selectRandomRace = "SELECT name FROM races ORDER BY RANDOM() LIMIT 1"
-insertNewUser = "INSERT INTO users (team_name, access_token, team_id, scope) VALUES (%(team_name)s, %(access_token)s, %(team_id)s, %(scope)s)"
+insertNewUser = "INSERT INTO users (team_name, access_token, team_id, scope, webhook_url, created_at, updated_at) VALUES (%(team_name)s, %(access_token)s, %(team_id)s, %(scope)s, %(webhook_url)s, now(), now())"
 
 # Create your views here.
 @csrf_exempt
@@ -266,13 +266,30 @@ def auth_success(request):
 		except:
 			print "Error retreiving user_id from response. Logging as None"
 			user_id = None
+		try:
+			webhook_url = dataReceived['incoming_webhook']['url']
+			print "webhook_url", webhook_url
+		except:
+			print "Error retreiving webhook_url from response. Logging as None"
+			webhook_url = None
 
 
 		##### still need to log this in my database, might need it later #####
-		cur.execute(insertNewUser, {'team_name':team_name, 'access_token':access_token, 'team_id':team_id, 'scope':scope})
+		cur.execute(insertNewUser, {'team_name':team_name, 'access_token':access_token, 'team_id':team_id, 'scope':scope, 'webhook_url':webhook_url})
 		conn.commit()
 
 		print "Success! I should now have an access_token for the new user's team, and they should now be able to use my service!"
+
+		## ping team using webhook_url and introduce myself
+		print "Introducing myself to "+str(team_name)
+		if webhook_url is not None:
+			response = requests.post(webhook_url, data=json.dumps({'text':'Lo!\nThanks for the Guild invite, %(team_name)s.  Here to make daily introductions a little more friendly.\nGive it a whirl with:\n>`/wow greetings`\nAnd if you ever find yourself stuck LFM, `/wow help` or `/wow races` are your friends.\nWatch yer back! :crossed_swords:'%{'team_name':team_name}, 'username':'Warcraft Greetings', 'icon_url':'https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-08-11/68703636325_479501fda3b50e7281a8_512.png'}))
+			if response.status_code != 200:
+				print response
+				print "Introduction response META:", response.META
+				print "Introduction response data:", response.json()
+		else:
+			print "webhook_url was None, so I am unable to introduce myself to "+str(team_name)
 
 		## track Mixpanel
 		mp.track(str(team_id)+"_"+str(user_id), "Signup", {'scope':scope, 'team_id':team_id, 'team_name':team_name, 'user_id':user_id})
@@ -280,9 +297,9 @@ def auth_success(request):
 		## create/update Mixpanel User
 		mp.people_set(str(team_id)+"_"+str(user_id), {'$distinct_id':str(team_id)+"_"+str(user_id), 'slack_team_name':team_name})
 
-		## ping myself in slack
-		SLACK_WEBHOOK_URL = os.environ['SLACK_WEBHOOK_URL']
-		response = requests.post(SLACK_WEBHOOK_URL, payload={'text':'A new User has signed up for Warcraft Greetings!  Huzzah! :crossed_swords:\nMeet the %(team_name)s Team.'%{'team_name':team_name}, 'channel':'@taylor', 'username':'Warcraft Greetings', 'icon_url':'https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-08-11/68703636325_479501fda3b50e7281a8_512.png'})
+		## ping myself in Slack
+		MY_SLACK_WEBHOOK_URL = os.environ['SLACK_WEBHOOK_URL']
+		response = requests.post(MY_SLACK_WEBHOOK_URL, data=json.dumps({'text':'A new User has signed up for Warcraft Greetings!  Huzzah! :crossed_swords:\nMeet the %(team_name)s Team.'%{'team_name':team_name}, 'channel':'@taylor', 'username':'Warcraft Greetings', 'icon_url':'https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-08-11/68703636325_479501fda3b50e7281a8_512.png'}))
 		if response.status_code != 200:
 			print response
 			print "Slack response META:", response.META
