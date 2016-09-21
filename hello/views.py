@@ -50,6 +50,7 @@ checkRace = "SELECT id FROM races WHERE name=%(race_name)s"
 selectAllRaces = "SELECT name FROM races"
 selectRandomRace = "SELECT name FROM races ORDER BY RANDOM() LIMIT 1"
 insertNewUser = "INSERT INTO users (team_name, access_token, team_id, scope, webhook_url, created_at, updated_at) VALUES (%(team_name)s, %(access_token)s, %(team_id)s, %(scope)s, %(webhook_url)s, now(), now())"
+selectRandomTitle = "SELECT title, before_name FROM titles ORDER BY RANDOM() LIMIT 1"
 
 # Create your views here.
 @csrf_exempt
@@ -106,6 +107,13 @@ def index(request):
 			cur.execute(selectRandomRace,)
 			desired_race = cur.fetchone()[0]
 
+		## get random title to use for User
+		title = "Master "
+		beforeName = True
+		if beforeName:
+			usernameWithTitle = title + "@" + inputs['user_name'][0]
+		else:
+			usernameWithTitle = "@" + inputs['user_name'][0] + title
 
 		## check first greeting or farewell or unknown
 		if greeting_or_farewell == "greeting" or greeting_or_farewell == "greetings":
@@ -124,7 +132,7 @@ def index(request):
 				## create/update Mixpanel User
 				mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'$name':inputs['user_name'][0], '$distinct_id':inputs['team_id'][0]+"_"+inputs['user_id'][0], 'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
 
-				requests.post(inputs['response_url'][0], data=json.dumps({"text":"Master @%(username)s says: %(wow_message)s"%{'username':inputs['user_name'][0], 'wow_message':wow_message}, "response_type":"in_channel"}))
+				requests.post(inputs['response_url'][0], data=json.dumps({"text":"%(username)s says: %(wow_message)s"%{'username':usernameWithTitle, 'wow_message':wow_message}, "response_type":"in_channel"}))
 				return HttpResponse(status=201)
 			else:
 				return JsonResponse({"text":"I'm ever so sorry Master @%(username)s.  It appears my tomes have gotten mixed up.  Please query my wisdom later. :crystal_ball:"%{'username':inputs['user_name'][0]}})
