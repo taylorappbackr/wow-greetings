@@ -109,7 +109,7 @@ def index(request):
 
 		## get random title to use for User
 		title = "Master "
-		beforeName = False
+		beforeName = True
 		if beforeName:
 			usernameWithTitle = title + "@" + inputs['user_name'][0]
 		else:
