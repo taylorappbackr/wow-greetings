@@ -50,7 +50,7 @@ checkRace = "SELECT id FROM races WHERE name=%(race_name)s"
 selectAllRaces = "SELECT name FROM races"
 selectRandomRace = "SELECT name FROM races ORDER BY RANDOM() LIMIT 1"
 insertNewUser = "INSERT INTO users (team_name, access_token, team_id, scope, webhook_url, created_at, updated_at) VALUES (%(team_name)s, %(access_token)s, %(team_id)s, %(scope)s, %(webhook_url)s, now(), now())"
-selectRandomTitle = "SELECT title, before_name FROM titles ORDER BY RANDOM() LIMIT 1"
+selectRandomTitle = "SELECT title_text, place_title_before FROM titles ORDER BY RANDOM() LIMIT 1"
 
 # Create your views here.
 @csrf_exempt
@@ -108,12 +108,22 @@ def index(request):
 			desired_race = cur.fetchone()[0]
 
 		## get random title to use for User
-		title = "Master "
-		beforeName = True
+		try:
+			cur.execute(selectRandomTitle,)
+			titleData = cur.fetchone()
+			title = titleData[0]
+			beforeName = titleData[1]
+		except:
+			print "Error getting random title from database, using standard"
+			title = "Master "
+			beforeName = True
+
 		if beforeName:
 			usernameWithTitle = title + "@" + inputs['user_name'][0]
+			print "usernameWithTitle:", usernameWithTitle
 		else:
 			usernameWithTitle = "@" + inputs['user_name'][0] + title
+			print "usernameWithTitle:", usernameWithTitle
 
 		## check first greeting or farewell or unknown
 		if greeting_or_farewell == "greeting" or greeting_or_farewell == "greetings":
@@ -127,7 +137,7 @@ def index(request):
 					requested_race = False
 				else:
 					requested_race = True
-				mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Greeting", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+				mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Greeting", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0], 'title_used':title, 'title_used_before_name':beforeName})
 
 				## create/update Mixpanel User
 				mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'$name':inputs['user_name'][0], '$distinct_id':inputs['team_id'][0]+"_"+inputs['user_id'][0], 'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
@@ -148,7 +158,7 @@ def index(request):
 					requested_race = False
 				else:
 					requested_race = True
-				mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Farewell", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+				mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Farewell", {'desired_race':desired_race, 'specific_race_requested':requested_race, "message_text":wow_message, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0], 'title_used':title, 'title_used_before_name':beforeName})
 
 				## create/update Mixpanel User
 				mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'$name':inputs['user_name'][0], '$distinct_id':inputs['team_id'][0]+"_"+inputs['user_id'][0], 'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
