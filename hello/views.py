@@ -5,6 +5,17 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Greeting
 import json, random, requests, mixpanel, os, psycopg2, urlparse, uuid
 from mixpanel import Mixpanel
+import rollbar
+
+rollbar.init('72a4945b7eb94bb0b2b933f018f55331', 'production')  # access_token, environment
+try:
+	main_app_loop()
+except IOError:
+	rollbar.report_message('Got an IOError in the main loop', 'warning')
+except:
+	# catch-all
+	rollbar.report_exc_info()
+	# equivalent to rollbar.report_exc_info(sys.exc_info())
 
 urlparse.uses_netloc.append("postgres")
 url = urlparse.urlparse(os.environ["DATABASE_URL"])
