@@ -15,3 +15,5 @@ from whitenoise.django import DjangoWhiteNoise
 
 application = get_wsgi_application()
 application = DjangoWhiteNoise(application)
+
+NEW_RELIC_CONFIG_FILE=newrelic.ini newrelic-admin run-program command options
