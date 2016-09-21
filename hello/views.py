@@ -9,7 +9,8 @@ import rollbar
 
 rollbar.init('72a4945b7eb94bb0b2b933f018f55331', 'production')  # access_token, environment
 try:
-	main_app_loop()
+	#main_app_loop()
+	print "Need to init rollbar..."
 except IOError:
 	rollbar.report_message('Got an IOError in the main loop', 'warning')
 except:
