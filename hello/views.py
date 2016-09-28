@@ -310,19 +310,26 @@ def auth_success(request):
 
 		print "Success! I should now have an access_token for the new user's team, and they should now be able to use my service!"
 
+		## track Mixpanel
+		mp.track(str(team_id)+"_"+str(user_id), "Signup", {'scope':scope, 'team_id':team_id, 'team_name':team_name, 'user_id':user_id})
+
 		## ping team using webhook_url and introduce myself
 		print "Introducing myself to "+str(team_name)
 		if webhook_url is not None:
-			response = requests.post(webhook_url, data=json.dumps({'text':'Lo!\nThanks for the Guild invite, %(team_name)s.  Here to make daily introductions a little more friendly.\nGive it a whirl with:\n>`/wow greetings`\nAnd if you ever find yourself stuck LFM, `/wow help` or `/wow races` are your friends.\nWatch yer back! :crossed_swords:'%{'team_name':team_name}, 'username':'Warcraft Greetings', 'icon_url':'https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-08-11/68703636325_479501fda3b50e7281a8_512.png'}))
+
+			## introduce to team
+			introMessage = 'Lo!\nThanks for the Guild invite, %(team_name)s.  Here to make daily introductions a little more friendly.\nGive it a whirl with:\n>`/wow greetings`\nAnd if you ever find yourself stuck LFM, `/wow help` or `/wow races` are your friends.\nWatch yer back! :crossed_swords:' % {'team_name':team_name}
+			response = requests.post(webhook_url, data=json.dumps({'text':introMessage, 'username':'Warcraft Greetings', 'icon_url':'https://s3-us-west-2.amazonaws.com/slack-files2/avatars/2016-08-11/68703636325_479501fda3b50e7281a8_512.png'}))
+
+			## track Mixpanel
+			mp.track(str(team_id)+"_"+str(user_id), "Introduction", {'intro_message':introMessage, 'team_id':team_id, 'team_name':team_name, 'user_id':user_id})
+
 			if response.status_code != 200:
 				print response
 				print "Introduction response META:", response.META
 				print "Introduction response data:", response.json()
 		else:
 			print "webhook_url was None, so I am unable to introduce myself to "+str(team_name)
-
-		## track Mixpanel
-		mp.track(str(team_id)+"_"+str(user_id), "Signup", {'scope':scope, 'team_id':team_id, 'team_name':team_name, 'user_id':user_id})
 
 		## create/update Mixpanel User
 		mp.people_set(str(team_id)+"_"+str(user_id), {'$distinct_id':str(team_id)+"_"+str(user_id), 'slack_team_name':team_name})
