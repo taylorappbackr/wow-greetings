@@ -205,6 +205,13 @@ def index(request):
 				return JsonResponse({"text":"World of Warcraft races available for you to choose from are: %(races)s  (Make your selection after 'greeting' or 'farewell')"%{"races":races_list}})
 
 		else:
+
+			## track Mixpanel
+			mp.track(inputs['team_id'][0]+"_"+inputs['user_id'][0], "Unknown Request", {'command_given':greeting_or_farewell, 'slack_user_name':inputs['user_name'][0], 'channel_name':inputs['channel_name'][0], 'slack_team_name':inputs['team_domain'][0], 'given_text':inputs['text'][0]})
+
+			## create/update Mixpanel User
+			mp.people_set(inputs['team_id'][0]+"_"+inputs['user_id'][0], {'$name':inputs['user_name'][0], '$distinct_id':inputs['team_id'][0]+"_"+inputs['user_id'][0], 'slack_user_name':inputs['user_name'][0], 'slack_team_name':inputs['team_domain'][0]})
+
 			return JsonResponse({"text":"Sorry friend, afraid I'm not attuned to \"%(input_text)s\" in these parts.  You'll have better luck with either 'greeting' or 'farewell'. :crossed_swords:."%{'input_text': text[0]}})
 
 ## Display homepage for people to learn and signup
