@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -220,9 +220,14 @@ def home(request):
 	print "Loading homepage from Auth view."
 
 	## track Mixpanel
-	mp.track(str(uuid.uuid4()), "Load Homepage")
+	#mp.track(str(uuid.uuid4()), "Load Homepage")
 
-	return render(request, 'base.html')
+	#return render(request, 'base.html')
+
+	## track Mixpanel
+	mp.track(str(uuid.uuid4()), "New Homepage Redirect")
+
+	return redirect('https://www.warcraftgreetings.com/')
 
 
 ## Not needed (from original setup code), but crashes the setup files somewhere...
